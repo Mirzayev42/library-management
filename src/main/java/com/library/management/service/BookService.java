@@ -133,12 +133,14 @@ public class  BookService {
 
         Category category;
         if (categoryRepository.existsByName(categoryName)) {
-            category = categoryRepository.findByName(categoryName).get();
+            category = categoryRepository.findByName(categoryName)
+                    .orElseThrow(() -> new EntityNotFoundException("Kateqoriya tapılmadı"));
         } else {
             Category newCategory = new Category();
             newCategory.setName(categoryName);
             category = categoryRepository.save(newCategory);
         }
+        
 
 
                 Book book = new Book();
