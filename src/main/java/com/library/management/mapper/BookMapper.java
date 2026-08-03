@@ -5,11 +5,14 @@ import com.library.management.model.Book;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.stream.Collectors;
+
 @Component
 @RequiredArgsConstructor
 public class BookMapper {
 
     private final AuthorMapper authorMapper;
+    private final CategoryMapper categoryMapper;
 
     public BookDto toDto(Book book) {
         if (book == null) {
@@ -23,6 +26,12 @@ public class BookMapper {
         if (book.getAuthor() != null) {
             dto.setAuthorId(book.getAuthor().getId());
             dto.setAuthor(authorMapper.toDto(book.getAuthor()));
+        }
+
+        if (book.getCategories() != null) {
+            dto.setCategories(book.getCategories().stream()
+                    .map(categoryMapper::toDto)
+                    .collect(Collectors.toSet()));
         }
 
         return dto;

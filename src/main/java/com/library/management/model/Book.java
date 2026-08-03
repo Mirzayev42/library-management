@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -21,4 +24,9 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "author_id", nullable = false)
     private Author author;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "book_categories",
+            joinColumns = @JoinColumn(name = "book_id"),inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<Category> categories = new HashSet<>();
 }

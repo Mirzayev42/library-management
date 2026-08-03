@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,6 +18,7 @@ public class BookDto {
     @NotNull(message = "Müəllif ID-si qeyd olunmalıdır")
     private Long authorId;
     private AuthorDto author;
+    private Set<CategoryDto> categories;
 
 }
 

@@ -3,17 +3,22 @@ import com.library.management.dto.BookDto;
 import com.library.management.mapper.BookMapper;
 import com.library.management.model.Author;
 import com.library.management.model.Book;
+import com.library.management.model.Category;
 import com.library.management.repository.AuthorRepository;
 import com.library.management.repository.BookRepository;
+import com.library.management.repository.CategoryRepository;
+import com.library.management.specification.BookSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -23,6 +28,7 @@ public class  BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
     private final AuthorRepository authorRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional
     public BookDto createBook(BookDto bookDto) {
@@ -86,5 +92,56 @@ public class  BookService {
             throw new EntityNotFoundException("Silmək üçün kitab tapılmadı!");
         }
         bookRepository.deleteById(id);
+    }
+
+    public List<BookDto> getBooksByTitle(String title) {
+       return bookRepository.findByTitleContainingIgnoreCase(title).
+                stream()
+                .map(bookMapper::toDto)
+                .collect(Collectors.toList());
+    }
+    public List<BookDto> getBooksByAuthorName(String authorName) {
+        return bookRepository.findBooksByAuthorName(authorName).stream()
+                .map(bookMapper::toDto)
+                .collect(Collectors.toList());
+    }
+    public List<BookDto> getBooksByCategoryName(String categoryName) {
+        return bookRepository.findBooksByCategoryName(categoryName).stream()
+                .map(bookMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<BookDto> searchBooks(String title, String authorName, String categoryName){
+        Specification<Book> spec =  Specification.where(BookSpecification.hasTitle(title))
+                .and(BookSpecification.hasAuthorName(authorName))
+                .and(BookSpecification.hasCategoryName(categoryName));
+
+        return bookRepository.findAll(spec).stream()
+                .map(bookMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BookDto createBookWithAuthorAndCategory(String bookTitle, String authorName, String categoryName){
+        Author author = authorRepository.findByName(authorName)
+                .orElseGet(() -> {
+                    Author newAuthor = new Author();
+                    newAuthor.setName(authorName);
+                    return authorRepository.save(newAuthor);
+                });
+
+        Category category = categoryRepository.findByName(categoryName)
+                .orElseGet(() -> {
+                    Category newCategory = new Category();
+                    newCategory.setName(categoryName);
+                    return categoryRepository.save(newCategory);
+                });
+
+                Book book = new Book();
+                book.setTitle(bookTitle);
+                book.setAuthor(author);
+                book.setCategories(Set.of(category));
+                Book bookSaved = bookRepository.save(book);
+                return bookMapper.toDto(bookSaved);
     }
 }

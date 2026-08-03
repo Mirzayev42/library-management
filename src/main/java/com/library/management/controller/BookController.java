@@ -51,6 +51,38 @@ public class BookController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<BookDto>> getBooksByTitle(@RequestParam String title) {
+        return ResponseEntity.ok(bookService.getBooksByTitle(title));
+    }
+
+    @GetMapping("/filter/author")
+    public ResponseEntity<List<BookDto>> getBooksByAuthorName(@RequestParam String authorName) {
+        return ResponseEntity.ok(bookService.getBooksByAuthorName(authorName));
+    }
+
+    @GetMapping("/filter/category")
+    public ResponseEntity<List<BookDto>> getBooksByCategoryName(@RequestParam String categoryName) {
+        return ResponseEntity.ok(bookService.getBooksByCategoryName(categoryName));
+    }
+
+    @GetMapping("/dynamic-search")
+    public ResponseEntity<List<BookDto>> dynamicSearch(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String authorName,
+            @RequestParam(required = false) String categoryName) {
+        return ResponseEntity.ok(bookService.searchBooks(title, authorName, categoryName));
+    }
+
+    @PostMapping("/with-author-and-category")
+    public ResponseEntity<BookDto> createBookWithAuthorAndCategory(
+            @RequestParam String bookTitle,
+            @RequestParam String authorName,
+            @RequestParam String categoryName) {
+
+        BookDto createdBook = bookService.createBookWithAuthorAndCategory(bookTitle, authorName, categoryName);
+        return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
+    }
 }
 
 
