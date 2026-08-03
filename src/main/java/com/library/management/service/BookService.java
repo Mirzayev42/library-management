@@ -130,12 +130,16 @@ public class  BookService {
                     return authorRepository.save(newAuthor);
                 });
 
-        Category category = categoryRepository.findByName(categoryName)
-                .orElseGet(() -> {
-                    Category newCategory = new Category();
-                    newCategory.setName(categoryName);
-                    return categoryRepository.save(newCategory);
-                });
+
+        Category category;
+        if (categoryRepository.existsByName(categoryName)) {
+            category = categoryRepository.findByName(categoryName).get();
+        } else {
+            Category newCategory = new Category();
+            newCategory.setName(categoryName);
+            category = categoryRepository.save(newCategory);
+        }
+
 
                 Book book = new Book();
                 book.setTitle(bookTitle);
